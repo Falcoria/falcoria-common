@@ -35,7 +35,6 @@ class RedisKeyBuilder:
         """ Returns a key for tracking running tools on a specific host. Worker only"""
         return f"running:tool:{tool}:host:{hostname}"
 
-
     @staticmethod
     def task_ids_key(project: str) -> str:
         return f"project:{project}:task_ids"
@@ -51,37 +50,3 @@ class RedisKeyBuilder:
     @staticmethod
     def running_targets_key(project: str) -> str:
         return f"project:{project}:running_targets"
-    
-    @staticmethod
-    def worker_ip_pattern() -> str:
-        return "worker_ip:*"
-    
-    @staticmethod
-    def pid_tracking_key(tool: str, hostname: str, pid: int) -> str:
-        return f"running:{tool}:{hostname}:{pid}"
-    
-    @staticmethod
-    def task_metadata_key(task_id: str) -> str:
-        return f"task:{task_id}"
-
-
-
-
-class RedisValueBuilder:
-    @staticmethod
-    def pid_entry(pid: int, hostname: str) -> str:
-        """ Creates a JSON string representing a PID entry. """
-        return json.dumps({"pid": pid, "host": hostname})
-    
-    @staticmethod
-    def parse_pid_entry(entry) -> dict | None:
-        """ Parses a PID entry from Redis. Used by workers to identify themselves. """
-        try:
-            if isinstance(entry, bytes):
-                entry = entry.decode()
-            info = json.loads(entry)
-            if not isinstance(info, dict) or "host" not in info or "pid" not in info:
-                return None
-            return info
-        except Exception:
-            return None

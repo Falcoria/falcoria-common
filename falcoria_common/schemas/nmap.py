@@ -1,12 +1,9 @@
-import json
-
 from uuid import UUID
-from typing import List, Optional
-from enum import Enum
+from typing import List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
-from .enums import ImportMode, NmapTaskStatus
+from falcoria_common.schemas.enums.common import ImportMode
 
 
 class TaskUser(BaseModel):
@@ -29,6 +26,7 @@ class NmapTask(BaseModel):
     mode: ImportMode
     user: TaskUser
     open_ports_str: str
+    track_history: bool
 
 
 class RunningNmapTarget(BaseModel):
@@ -56,3 +54,20 @@ class NmapTaskSummary(BaseModel):
     active_or_queued: int
     running: int
     running_targets: List[NmapRunningTarget]
+
+
+class ServiceOptsBase(BaseModel):
+    aggressive_scan: bool = Field(default=False, description="Enable aggressive scan mode (-A)")
+    default_scripts: bool = Field(default=False, description="Use default Nmap scripts (-sC)")
+    os_detection: bool = Field(default=False, description="Enable OS detection (-O)")
+    traceroute: bool = Field(default=False, description="Trace hop path to each host (--traceroute)")
+
+
+class RunNmapRequestBase(BaseModel):
+    hosts: List[str]
+    #open_ports_opts: OpenPortsOpts
+    #service_opts: ServiceOpts
+    timeout: int = Field(..., ge=1, le=60*60*24, description="Timeout in seconds for the scan")
+    include_services: bool = Field(..., description="Include service detection in the scan")
+    mode: ImportMode = Field(..., description="Import mode for the scan results")
+    track_history: bool = True

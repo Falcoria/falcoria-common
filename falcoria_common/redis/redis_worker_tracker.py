@@ -15,7 +15,7 @@ class RedisWorkerTracker:
         }
         """
         result = {}
-        keys = await self.redis.keys(RedisKeyBuilder.worker_ip_pattern())
+        keys = await self.redis.keys(RedisKeyBuilder.worker_ip_key("*"))
 
         for key in keys:
             hostname = key.decode().split(":", 1)[1]
