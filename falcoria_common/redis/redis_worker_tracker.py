@@ -7,20 +7,24 @@ class RedisWorkerTracker:
     def __init__(self, redis_client: AsyncRedis):
         self.redis = redis_client
 
-    async def get_worker_ips_raw(self) -> dict[str, str]:
+    async def get_worker_data_raw(self) -> dict[str, dict[str, str]]:
         """
-        Returns raw worker IP data:
+        Returns raw worker data from Redis hashes:
         {
-            hostname: <raw Redis value as string>
+            hostname: {
+                "ip": "...",
+                "last_updated": "...",
+                "last_seen": "..."
+            }
         }
         """
-        result = {}
-        keys = await self.redis.keys(RedisKeyBuilder.worker_ip_key("*"))
+        result: dict[str, dict[str, str]] = {}
+        keys = await self.redis.keys(RedisKeyBuilder.worker_key("*"))
 
         for key in keys:
             hostname = key.decode().split(":", 1)[1]
-            raw_value = await self.redis.get(key)
-            if raw_value:
-                result[hostname] = raw_value.decode()
+            raw_fields = await self.redis.hgetall(key)
+            if raw_fields:
+                result[hostname] = {k.decode(): v.decode() for k, v in raw_fields.items()}
 
         return result

@@ -23,8 +23,8 @@ class RedisKeyBuilder:
         return f"task:{task_id}:metadata:nmap"
 
     @staticmethod
-    def worker_ip_key(hostname: str) -> str:
-        return f"worker_ip:{hostname}"
+    def worker_key(hostname: str) -> str:
+        return f"worker:{hostname}"
 
     @staticmethod
     def running_tasks_key(task_id: str, hostname: str) -> str:
